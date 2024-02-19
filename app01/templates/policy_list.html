@@ -1,0 +1,52 @@
+{% extends 'layout.html' %}
+{% load static %}
+{% block content %}
+    <div style="margin-bottom: 5px">
+        <a href="{% url 'policy_add' %}" class="btn btn-success">
+            <span class="glyphicon glyphicon-plus-sign"></span>新建
+        </a>
+    </div>
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>数量</th>
+            <th>价格</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for row in pager.queryset %}
+            <tr row-id="{{ row.id }}">
+                <td>{{ row.id }}</td>
+                <td>{{ row.count }}</td>
+                <td>{{ row.price }}</td>
+                <td>
+                    <a href="{% url 'policy_edit' pk=row.id %}" class="btn btn-primary btn-xs">编辑</a>
+                    <a cid="{{ row.id }}" class="btn btn-danger btn-xs btn-delete">删除</a>
+                </td>
+            </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+    <ul class="pagination">
+        {{ pager.html }}
+    </ul>
+
+
+    {% include 'include/delete_modal.html' %}
+
+{% endblock %}
+
+
+
+
+{% block js %}
+    <script src="{% static 'js/delete_modal.js' %}"></script>
+    <script>
+        var DELETE_ID;
+        var DELETE_URL = "{% url 'policy_delete' %}";
+    </script>
+
+{% endblock %}
