@@ -1,0 +1,99 @@
+{% extends 'layout.html' %}
+{% load common %}
+{% load permission %}
+
+{% block content %}
+    <div id="pageMsg"
+         style="position: fixed; z-index: 9000; top: 48px; left:0;right:0; width: 300px;margin: 20px auto;">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}" role="alert">{{ message }}</div>
+        {% endfor %}
+    </div>
+
+
+    <div style="margin-bottom: 5px;">
+
+        {% if search_group %}
+            <div class="panel panel-default">
+                <div class="panel-heading">快速搜索</div>
+                <div class="panel-body">
+                    <div class="search-group">
+                        {% for row_object in search_row_list %}
+                            <div class="row">
+                                {% for col in row_object %}
+                                    {{ col|safe }}
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+        {% endif %}
+
+        {% if  url_add_name %}
+            <!-- 权限判断 -->
+            {% if request|has_permission:url_add_name %}
+                <a class="btn btn-primary" href="{% url_plus request url_add_name %}">添加</a>
+            {% endif %}
+        {% endif %}
+
+
+        {% if search_list %}
+            <div class="right">
+                <form class="form-inline" method="GET">
+                    <div class="form-group">
+                        <input name="keyword" type="text" class="form-control" placeholder="请输入关键字"
+                               value="{{ keyword }}">
+                    </div>
+                    <button type="submit" class="btn btn-default">
+                        <span class="glyphicon glyphicon-search"></span>
+                    </button>
+                </form>
+            </div>
+        {% endif %}
+    </div>
+
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>序号</th>
+            {% for item in table_header %}
+                <th>{{ item }}</th>
+            {% endfor %}
+            {% if request|has_permission:url_edit_name or  request|has_permission:url_delete_name %}
+                <th>选项</th>
+            {% endif %}
+        </tr>
+        </thead>
+        <tbody>
+        {% for row in pager.queryset %}
+            <tr>
+                <td>{% loop_counter request forloop.counter %}</td>
+
+                {% for name in table_field %}
+                    <td>{% render_td request row name %}</td>
+                {% endfor %}
+
+                {% if request|has_permission:url_edit_name or  request|has_permission:url_delete_name %}
+                    <td>
+                        {% if request|has_permission:url_edit_name %}
+                            <a class="btn btn-success btn-xs"
+                               href="{% url_plus request url_edit_name pk=row.id %}">编辑</a>
+                        {% endif %}
+                        {% if request|has_permission:url_delete_name %}
+                            <a class="btn btn-danger btn-xs"
+                               href="{% url_plus request url_delete_name pk=row.id %}">删除</a>
+                        {% endif %}
+                    </td>
+                {% endif %}
+
+            </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+
+    {{ pager.html }}
+
+{% endblock %}

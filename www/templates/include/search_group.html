@@ -1,0 +1,14 @@
+<div class="panel panel-default">
+    <div class="panel-heading">快速搜索</div>
+    <div class="panel-body">
+        <div class="search-group">
+            {% for row_object in row_list %}
+                <div class="row">
+                    {% for col in row_object %}
+                        {{ col|safe }}
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>

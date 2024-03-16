@@ -1,0 +1,68 @@
+{% load permission %}
+{% load menu %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="{% static 'plugins/bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'plugins/font-awesome/css/font-awesome.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/commons.css' %}">
+    <link rel="stylesheet" href="{% static 'css/menu.css' %}">
+    <link rel="stylesheet" href="{% static 'css/nav.css' %}">
+    <link rel="stylesheet" href="{% static 'css/search-group.css' %}">
+</head>
+<body>
+
+<div class="pg-header">
+    <div class="nav">
+        <div class="logo-area left">
+            <a href="{% url 'home' %}">
+                <span style="font-size: 18px;">Order Management System </span>
+            </a>
+        </div>
+        <div class="right-menu right clearfix">
+
+            <div class="user-info right">
+                <a href="#" class="avatar" style="text-decoration: none;">
+                    <span style="color: white;margin-right: 5px;">{{ request.nb_user.name }}</span>
+                    <img class="img-circle" style="width: 35px;height: 35px;" src="{% static 'images/default.png' %}">
+                </a>
+
+                <div class="more-info">
+                    <a href="{% url 'login' %}" class="more-item">注销1</a>
+                    <a href="{% url 'login' %}" class="more-item">注销2</a>
+                    <a href="{% url 'login' %}" class="more-item">注销3</a>
+                    <a href="{% url 'logout' %}" class="more-item">退出</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="pg-body">
+
+    <div class="left-menu">
+        <div class="menu-body">
+            {% nb_menu request %}
+        </div>
+    </div>
+
+    <div class="right-body">
+        {% nb_breadcrumb request %}
+
+        <div style="padding: 0 20px 20px 20px;">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+
+</div>
+
+<script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
+<script src="{% static 'js/menu.js' %}"></script>
+{% block js %}{% endblock %}
+</body>
+</html>

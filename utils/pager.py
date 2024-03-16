@@ -1,25 +1,44 @@
 """
-如果想要以后使用分页，需要以下两个步骤：
-在视图函数：
-    def customer_list(request):
-        # 所有数据
-        queryset = models.Customer.objects.filter(active=1).select_related('level')
+v1版本
+    在视图函数：
+        def customer_list(request):
+            # 所有数据
+            queryset = models.Customer.objects.filter(active=1).select_related('level')
 
-        pager = Pagination(request, queryset)
-        context = {
-            "queryset": queryset[pager.start:pager.end],
-            "pager_string": obj.html()
-        }
-        return render(request, 'customer_list.html', context)
+            pager = Pagination(request, queryset)
+            context = {
+                "queryset": queryset[pager.start:pager.end],
+                "pager_string": obj.html()
+            }
+            return render(request, 'customer_list.html', context)
 
-在页面上：
-    {% for row in queryset %}
-        {{row.id}}
-    {% endfor %}
+    在页面上：
+        {% for row in queryset %}
+            {{row.id}}
+        {% endfor %}
 
-    <ul class="pagination">
-        {{ pager_string }}
-    </ul>
+        <ul class="pagination">
+            {{ pager_string }}
+        </ul>
+
+v2版本
+    在视图函数：
+        def customer_list(request):
+            # 所有数据
+            queryset = models.Customer.objects.filter(active=1).select_related('level')
+
+            pager = Pagination(request, queryset)
+            return render(request, 'customer_list.html', {"pager":pager})
+
+    在页面上：
+        {% for row in pager.queryset %}
+            {{row.id}}
+        {% endfor %}
+
+        <ul class="pagination">
+            {{ pager.html }}
+        </ul>
+
 """
 import copy
 from django.utils.safestring import mark_safe
@@ -29,31 +48,28 @@ class Pagination(object):
     """ 分页 """
 
     def __init__(self, request, query_set, per_page_count=10):
-
         self.query_dict = copy.deepcopy(request.GET)
         self.query_dict._mutable = True
 
         self.query_set = query_set
         total_count = query_set.count()
         self.total_count = total_count
+
         # 计算出总共有多少页面
         self.total_page, div = divmod(total_count, per_page_count)
         if div:
             self.total_page += 1
 
-        page = request.GET.get('page')
-        if not page:
+        # 字符串格式  123908sdfsdf
+        page = request.GET.get('page', "1")
+        if not page.isdecimal():
             page = 1
         else:
-            if not page.isdecimal():
+            page = int(page)
+            if page <= 0:
                 page = 1
-            else:
-                page = int(page)
-                if page <= 0:
-                    page = 1
-                else:
-                    if page > self.total_page:
-                        page = self.total_page
+            if page > self.total_page:
+                page = self.total_page
 
         self.page = page
         self.per_page_count = per_page_count
@@ -84,6 +100,8 @@ class Pagination(object):
                     start_page = self.page - 5
                     end_page = self.page + 5
 
+        pager_list.append('<ul class="pagination">')
+
         self.query_dict.setlist('page', [1])
         pager_list.append('<li><a href="?{}">首页</a></li>'.format(self.query_dict.urlencode()))
 
@@ -108,6 +126,9 @@ class Pagination(object):
 
         pager_list.append('<li class="disabled"><a>数据{}条{}页</a></li>'.format(self.total_count, self.total_page))
         pager_string = mark_safe("".join(pager_list))
+
+        pager_list.append('</ul>')
+
         return pager_string
 
     def queryset(self):

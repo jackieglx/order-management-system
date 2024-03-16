@@ -1,0 +1,77 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <div id="pageMsg" style="position: fixed; z-index: 9000; top: 48px; left:0;right:0; width: 300px;margin: 20px auto;">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}" role="alert">{{ message }}</div>
+        {% endfor %}
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading"> 个人资料</div>
+                <div class="panel-body">
+
+                    <form class="form-horizontal">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">用户名</label>
+                            <div class="col-sm-10">
+                                <p class="form-control-static">{{ instance.username }}</p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">余额</label>
+                            <div class="col-sm-10">
+                                <p class="form-control-static">{{ instance.balance }}</p>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading"> 重置密码</div>
+                <div class="panel-body">
+                    <form class="form-horizontal" method="post" novalidate>
+                        {% csrf_token %}
+
+                        {% for field in form %}
+                            <div class="form-group" style="position: relative;margin-bottom: 25px">
+                                <label for="{{ field.id_for_label }}" class="col-sm-2 control-label">
+                                    {{ field.label }}
+                                    {% if field.help_text %}
+                                        <span style="font-weight: 400;color: #333333;">（{{ field.help_text }}）</span>
+                                    {% endif %}
+                                </label>
+                                <div class="col-sm-10">
+                                    {{ field }}
+                                    <span style="color: red;position: absolute;">{{ field.errors.0 }}</span>
+                                </div>
+
+                            </div>
+                        {% endfor %}
+
+
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <button type="submit" class="btn btn-default">提 交</button>
+                                <span style="color: green;">{{ success }}</span>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script>
+        setTimeout(function () {
+            $("#pageMsg").empty();
+        }, 5000);
+    </script>
+{% endblock %}

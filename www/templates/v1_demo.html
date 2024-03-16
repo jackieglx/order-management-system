@@ -1,0 +1,56 @@
+{% load static %}
+{% load common %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="{% static 'plugins/bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'plugins/font-awesome/css/font-awesome.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/commons.css' %}">
+    <link rel="stylesheet" href="{% static 'css/search-group.css' %}">
+</head>
+<body>
+<div class="container">
+    <h2>快速搜索</h2>
+    <div class="search-group">
+        {% for row_object in row_list %}
+            <div class="row">
+                {% for col in row_object %}
+                    {{ col|safe }}
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+    <h2>数据列表</h2>
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>序号</th>
+
+            <th>用户名</th>
+            <th>级别</th>
+            <th>手机号</th>
+            <th>账户余额</th>
+            <th>创建日期</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for row in pager.queryset %}
+            <tr>
+                <td>{% loop_counter request forloop.counter %}</td>
+
+                <td>{{ row.username }}</td>
+                <td>{{ row.level.title }}（{{ row.level.percent }}%折扣）</td>
+                <td>{{ row.mobile }}</td>
+                <td>{{ row.balance }}</td>
+                <td>{{ row.create_date|date:"Y-m-d H:i:s" }}</td>
+
+            </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

@@ -1,0 +1,42 @@
+{% extends 'layout.html' %}
+{% load common %}
+{% load permission %}
+
+{% block content %}
+    <!-- 权限判断 -->
+    {% if request|has_permission:"price_add" %}
+        <div style="margin-bottom: 5px;">
+            <a class="btn btn-primary" href="{% url_plus request 'price_add' %}">添加</a>
+        </div>
+    {% endif %}
+
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>序号</th>
+            <th>数量</th>
+            <th>价格</th>
+            <th>选项</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for row in pager.queryset %}
+            <tr>
+                <td>{% loop_counter request forloop.counter %}</td>
+                <td>{{ row.count }}</td>
+                <td>¥{{ row.price }}</td>
+                <td>
+                    {% if request|has_permission:"price_edit" %}
+                        <a class="btn btn-success btn-xs" href="{% url_plus request 'price_edit' nid=row.id %}">编辑</a>
+                    {% endif %}
+                    {% if request|has_permission:"price_delete" %}
+                        <a class="btn btn-danger btn-xs" href="{% url_plus request 'price_delete' nid=row.id %}">删除</a>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+    {{ pager.html }}
+{% endblock %}

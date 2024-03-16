@@ -1,0 +1,45 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="{% static 'plugins/bootstrap/css/bootstrap.min.css' %}">
+    <style>
+        .box {
+            width: 450px;
+            border: 1px solid #f0f0f0;
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 100px;
+
+            padding-left: 40px;
+            padding-right: 40px;
+            padding-bottom: 30px;
+
+            box-shadow: 5px 10px 10px rgb(0 0 0 / 5%);
+        }
+    </style>
+</head>
+<body>
+<div class="box">
+    <h2 style="text-align: center;">User Login</h2>
+    <form method="post" novalidate>                 {#指定了表单的提交方法为 POST。novalidate 属性表示浏览器不执行表单的默认验证，是使用 Django表单的验证。#}
+        {% csrf_token %}
+        {% for field in form %}                     {#这里的form指的是 form.account.py里的SmsLoginForm#}
+            <div class="form-group" style="position: relative;margin-bottom: 25px">
+                <label>{{ field.label }}</label>    {#显示LoginForm中的标签文本，比如 username这个变量label="username",，就显示username#}
+                {{ field }}                         {# 根据字段类型，自动生成下拉框等，比如说字段是（CharField），将生成一个文本框#}
+                <span style="color: red;position: absolute;">{{ field.errors.0 }}</span> {# 在用户提交表单时，如果输入的数据不符合预期，就在该字段下方显示红色的错误消息#}
+            </div>
+        {% endfor %}
+
+        <button type="submit" class="btn btn-primary">Login</button>
+        <a href='{% url 'sms_login' %}' style="float: right;">SMS Login</a>
+        {# 根据urls.py里的别名name='sms_login'， 反向生成url： sms/login/#}
+
+    </form>
+</div>
+
+</body>
+</html>

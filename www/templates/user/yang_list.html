@@ -1,0 +1,89 @@
+{% extends 'layout.html' %}
+{% load common %}
+{% load permission %}
+
+
+{% block content %}
+    <div id="pageMsg"
+         style="position: fixed; z-index: 9000; top: 48px; left:0;right:0; width: 300px;margin: 20px auto;">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}" role="alert">{{ message }}</div>
+        {% endfor %}
+    </div>
+
+    <div style="margin-bottom: 5px;">
+        <!-- 权限判断 -->
+        {% if request|has_permission:"yang_add" %}
+            <a class="btn btn-primary" href="{% url_plus request 'yang_add' %}">添加</a>
+        {% endif %}
+
+        <div class="right">
+            <form class="form-inline" method="GET">
+                <div class="form-group">
+                    <input name="keyword" type="text" class="form-control" placeholder="请输入关键字" value="{{ keyword }}">
+                </div>
+                <button type="submit" class="btn btn-default">
+                    <span class="glyphicon glyphicon-search"></span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>序号</th>
+
+            <th>日期</th>
+            <th>订单号</th>
+            <th>URL</th>
+            <th>数量</th>
+            <th>价格</th>
+            <th>实际价格</th>
+            <th>原播放</th>
+            <th>状态</th>
+            <th>备注</th>
+
+            <th>选项</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for row in pager.queryset %}
+            <tr>
+                <td>{% loop_counter request forloop.counter %}</td>
+
+                <td>{{ row.create_datetime|date:"Y-m-d H:i:s" }}</td>
+                <td>{{ row.oid }}</td>
+                <td>{{ row.url }}</td>
+                <td>{{ row.count }}</td>
+                <td>{{ row.price }}</td>
+                <td>{{ row.real_price }}</td>
+                <td>{{ row.old_view_count }}</td>
+                <td>{{ row.get_status_display }}</td>
+                <td>{{ row.memo }}</td>
+
+                <td>
+                    {% if row.status == 1 %}
+                        {% if request|has_permission:"yang_cancel" %}
+                            <a class="btn btn-danger btn-xs"
+                               href="{% url_plus request 'yang_cancel' pk=row.id %}">撤单</a>
+                        {% endif %}
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+
+    {{ pager.html }}
+
+{% endblock %}
+
+{% block js %}
+    <script>
+        setTimeout(function () {
+            $("#pageMsg").empty();
+        }, 5000);
+    </script>
+{% endblock %}

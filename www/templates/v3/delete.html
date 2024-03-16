@@ -1,0 +1,21 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+
+    <div class="alert alert-danger alert-dismissible fade in" role="alert">
+        <form method="post">
+            {% csrf_token %}
+
+            <h4>是否确定删除？</h4>
+            <p>删除后，数据将恢复 or 删除后请去回收站进行回收。</p>
+            <p>
+                <input type="submit" value="确定" class="btn btn-danger"/>
+                <a class="btn btn-default" href="{{ origin }}">取消</a>
+            </p>
+
+        </form>
+    </div>
+
+
+
+{% endblock %}

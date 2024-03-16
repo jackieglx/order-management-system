@@ -1,5 +1,6 @@
-import requests
 import re
+import requests
+
 
 
 def get_old_view_count(video_url):
@@ -22,6 +23,6 @@ def get_old_view_count(video_url):
 
 
 if __name__ == '__main__':
-    # count = get_old_view_count("https://w.yangshipin.cn/video?type=0&vid=y000088hru8")
-    count = get_old_view_count("https://w.yangshipin.cn/video?type=0&vid=f0000711h22")
+    status, count = get_old_view_count("https://w.yangshipin.cn/video?type=0&vid=y000088hru8")
+    # count = get_old_view_count("https://w.yangshipin.cn/video?type=0&vid=f0000711h22")
     print(count)

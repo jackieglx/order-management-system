@@ -1,0 +1,40 @@
+{% extends 'layout.html' %}
+{% load permission %}
+{% block content %}
+    <h3>用户列表</h3>
+
+    <!-- 方式1 -->
+    {% if request|has_permission:"add_user" %}
+        <a href="{% url 'add_user' %}">新建用户</a>
+    {% endif %}
+
+    <hr/>
+    <!-- 方式2 -->
+    {% gen_and_permission request "add_user" "新建用户"%}
+
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>姓名</th>
+            <th>编辑</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>1</td>
+            <td>武沛齐</td>
+            <td>
+                {% gen_and_permission request "edit_user" "编辑" uid=1%}
+            </td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>张开</td>
+            <td>
+                {% gen_and_permission request "edit_user" "编辑" uid=2%}
+            </td>
+        </tr>
+        </tbody>
+    </table>
+{% endblock %}

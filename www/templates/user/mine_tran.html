@@ -1,0 +1,49 @@
+{% extends 'layout.html' %}
+{% load static %}
+{% load common %}
+{% load permission %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/search-group.css' %}">
+{% endblock %}
+
+{% block content %}
+
+    {% include 'include/search_group.html' %}
+
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>序号</th>
+
+            <th>日期</th>
+            <th>金额</th>
+            <th>类型</th>
+            <th>订单号</th>
+            <th>管理员</th>
+
+        </tr>
+        </thead>
+        <tbody>
+        {% for row in pager.queryset %}
+            <tr>
+                <td>{% loop_counter request forloop.counter %}</td>
+                <td>{{ row.create_datetime|date:"Y-m-d H:i:s" }}</td>
+                <td>{% tran_amount row.charge_type row.amount %}</td>
+                <td>
+                    <span class="btn btn-xs btn-{% tran_color_class row.charge_type %}">{{ row.get_charge_type_display }}</span>
+                </td>
+                <td>
+                    <a href="{% url "yang_list" %}?keyword={{ row.order_oid }}">订单号：{{ row.order_oid }}</a>
+                </td>
+                <td>{{ row.creator.username }}</td>
+            </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+
+    {{ pager.html }}
+
+{% endblock %}
+

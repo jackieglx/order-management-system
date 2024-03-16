@@ -1,0 +1,84 @@
+{% extends 'layout.html' %}
+{% load common %}
+{% load permission %}
+
+{% block content %}
+    <div id="pageMsg" style="position: fixed;top: 50px; left:0;right:0; width: 300px;margin: 20px auto;">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}" role="alert">{{ message }}</div>
+        {% endfor %}
+    </div>
+
+    <div style="margin-bottom: 5px;">
+        <!-- 权限判断 -->
+        {% if request|has_permission:"customer_add" %}
+            <a class="btn btn-primary" href="{% url_plus request 'customer_add' %}">添加</a>
+        {% endif %}
+
+        <div class="right">
+            <form class="form-inline" method="GET">
+                <div class="form-group">
+                    <input name="keyword" type="text" class="form-control" placeholder="请输入关键字" value="{{ keyword }}">
+                </div>
+                <button type="submit" class="btn btn-default">
+                    <span class="glyphicon glyphicon-search"></span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>序号</th>
+
+            <th>用户名</th>
+            <th>级别</th>
+            <th>手机号</th>
+            <th>账户余额</th>
+            <th>创建日期</th>
+            <th>重置密码</th>
+
+            <th>选项</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for row in pager.queryset %}
+            <tr>
+                <td>{% loop_counter request forloop.counter %}</td>
+
+                <td>{{ row.username }}</td>
+                <td>{{ row.level.title }}（{{ row.level.percent }}%折扣）</td>
+                <td>{{ row.mobile }}</td>
+                <td>{{ row.balance }}</td>
+                <td>{{ row.create_date|date:"Y-m-d H:i:s" }}</td>
+                <td>
+                    <a href="{% url_plus request 'customer_reset' pk=row.id %}">重置密码</a>
+                </td>
+                <td>
+                    {% if request|has_permission:"customer_edit" %}
+                        <a class="btn btn-success btn-xs" href="{% url_plus request 'customer_edit' pk=row.id %}">编辑</a>
+                    {% endif %}
+                    {% if request|has_permission:"customer_delete" %}
+                        <a class="btn btn-danger btn-xs"
+                           href="{% url_plus request 'customer_delete' pk=row.id %}">删除</a>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+
+    {{ pager.html }}
+
+
+{% endblock %}
+
+{% block js %}
+    <script>
+        setTimeout(function (){
+            $("#pageMsg").empty();
+        },5000);
+    </script>
+{% endblock %}

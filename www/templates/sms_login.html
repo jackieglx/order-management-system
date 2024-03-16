@@ -1,0 +1,190 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="{% static 'plugins/bootstrap/css/bootstrap.min.css' %}">
+    <style>
+        .box {
+            width: 450px;
+            border: 1px solid #f0f0f0;
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 100px;
+
+            padding-left: 40px;
+            padding-right: 40px;
+            padding-bottom: 30px;
+
+            box-shadow: 5px 10px 10px rgb(0 0 0 / 5%);
+        }
+
+        .error-msg {
+            color: red;
+            position: absolute;
+        }
+    </style>
+</head>
+<body>
+<div class="box">
+    <form method="post" id="smsForm">
+        <h2 style="text-align: center;">短信登录</h2>
+        {% csrf_token %}
+
+        {% for field in form %}   {#这里的form指的是 form.account.py里的LoginForm#}
+            {% if field.name == 'code' %}
+                <div class="form-group" style="position: relative;margin-bottom: 25px">
+                    <label>{{ field.label }}</label>
+                    <div class="row">
+                        <div class="col-xs-7">
+                            {{ field }}
+                            <span class="error-msg">{{ field.errors.0 }}</span>
+                        </div>
+                        <div class="col-xs-5">
+                            <input id="btnSendSms" type="button" value="Click to Get Verification Code" class="btn btn-default"/>
+                            {#  这个按钮是用来点击获取验证码的，这个按钮的id是btnSendSms，在下面的js中会用到 #}
+                        </div>
+                    </div>
+
+                </div>
+            {% else %}
+                <div class="form-group" style="position: relative;margin-bottom: 25px">
+                    <label>{{ field.label }}</label>
+                    {{ field }}
+                    <span class="error-msg">{{ field.errors.0 }}</span>
+                </div>
+            {% endif %}
+        {% endfor %}
+
+        <button type="button" class="btn btn-primary" id="btnSubmit">登 录</button>
+        <a href="{% url 'login' %}" style="float: right;">用户名登录</a>
+    </form>
+</div>
+
+
+<script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
+<script src="{% static 'js/csrf.js' %}"></script>
+<script>
+    $(function () {
+        //当页面加载完成之后，自动执行
+        bindSendSmsEvent();
+        //bindSubmitEvent();
+        bindSubmitEventCsrfHeader();
+    })
+
+    /**
+     * 绑定点击发送短信的事件
+     * bindSendSmsEvent用于给 ID 为 btnSendSms 的按钮绑定点击事件
+     */
+    function bindSendSmsEvent() {
+        $("#btnSendSms").click(function () {
+
+            $(".error-msg").empty() // 每次点击按钮的时候，清除所有显示出来的错误信息（比如说用户名错误，密码错误）
+
+            // 获取手机号 + 发送后台（手机号格式校验 + 限制） + 发送短信 => 发送成功
+            // Ajax 请求的目的是将数据发送到服务器以发送短信验证码。在服务器端操作成功完成（发送短信）后，客户端可以在不重新加载整个页面的情况下动态更新用户界面。
+            // 例如，它会更新按钮文本，显示倒计时，以便用户知道何时可以请求另一个验证码。
+            // 如果没有 Ajax，用户需要在点击按钮后等待整个页面重新加载，这可能不够流畅，也可能导致用户体验较差。
+            $.ajax({
+                //url:"/send/sms/",
+                url: "{% url 'send_sms' %}", {#通过设置 url 属性，你告诉 jQuery 的 $.ajax 方法应该将请求发送到哪个 URL#}
+                type: "POST",
+                data: { // data用于指定要发送到服务器的数据
+                    mobile: $("#id_mobile").val(),  {#获取输入框里用户输入的手机号#}
+{#                                                  $("#id_mobile") 是一个 jQuery 选择器，它选择页面上具有 id 为 id_mobile 的元素，.val() 是 jQuery 的方法，用于获取表单元素的当前值#}
+                    role: $("#id_role").val(),
+                },
+                dataType: "JSON",  {#告诉服务器和 jQuery，我期望接收的响应数据格式为 JSON#}
+                success: function (res) {
+                    if (res.status) {
+                        // 当服务器成功响应时，执行下面的代码
+                        // 这里res.status 是views.account.py里 send_sms(request)的status
+                        // 短信发送成功，显示 60秒重新发送  59秒重新发送    0秒重新发送  点击获取验证码
+
+                        $("#btnSendSms").prop("disabled", true); // 短信发送成功后禁用btnSendSms按钮
+                        var time = 10;
+                        var remind = setInterval(function () {
+                            $("#btnSendSms").val(time + "秒重新发送");
+                            time = time - 1;
+                            if (time < 1) {
+                                $("#btnSendSms").val("点击获取验证码");  // 如果倒计时结束，将btnSendSms按钮按钮的文本恢复到初始状态
+                                clearInterval(remind);
+                                $("#btnSendSms").prop("disabled", false); // 重新启用btnSendSms按钮，使用户可以再次点击。
+                            }
+                        }, 1000);
+
+                    } else {
+                        // 短信发送失败，将错误信息展示页面
+                        //  jQuery 的 $.each 函数用于遍历服务器返回的错误信息对象 res.msg。
+                        $.each(res.msg, function (k, v) {
+                            $("#id_" + k).next().text(v[0]);
+                        })
+                    }
+                }
+            })
+        });
+    }
+
+    function bindSubmitEvent() {
+        $("#btnSubmit").click(function () {
+
+            $(".error-msg").empty()
+
+            $.ajax({
+                //url:"/sms/login/",
+                url: "{% url 'sms_login' %}",
+                type: "POST",
+                data: $("#smsForm").serialize(), // 在31行，整个表单有一个id叫smsForm <form method="post" id="smsForm">
+                //  .serialize() 将 #smsForm 表单中的所有字段的名称和值序列化为一个字符串，其中字段之间用 & 连接，每个字段的名称和值之间用 = 连接
+                // 如果表单中有两个字段 username 和 password，并且用户输入的用户名是 "user"，密码是 "pass"，
+                // 那么 $("#smsForm").serialize() 将生成字符串 "username=user&password=pass"。
+                dataType: "JSON",
+                success: function (res) {
+                    if (res.status) {
+                        //成功是，自动跳转 res.data = '/home/'
+                        location.href = res.data;   // 实现页面的自动跳转，跳转到/home/，data是在sms_login里最后return的
+                    } else {
+                        //失败时，显示错误信息
+                        //console.log(res.msg);
+                        $.each(res.msg, function (k, v) {
+                            $("#id_" + k).next().text(v[0]);
+                        })
+                    }
+                }
+            })
+
+        });
+    }
+
+    function bindSubmitEventCsrfHeader() {
+        $("#btnSubmit").click(function () {
+            $(".error-msg").empty()
+            $.ajax({
+                //url:"/sms/login/",
+                url: "{% url 'sms_login' %}",
+                type: "POST",
+                data: {
+                    role: $("#id_role").val(),
+                    mobile: $("#id_mobile").val(),
+                    code: $("#id_code").val(),
+                },
+                dataType: "JSON",
+                success: function (res) {
+                    if (res.status) {
+                        //成功是，自动跳转 res.data = '/home/'
+                        location.href = res.data;
+                    } else {
+                        //失败时，显示错误信息
+                        //console.log(res.msg);
+                        $.each(res.msg, function (k, v) {
+                            $("#id_" + k).next().text(v[0]);
+                        })
+                    }
+                }
+            })
+        });
+    }
+</script>
+</body>
+</html>

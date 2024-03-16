@@ -1,0 +1,51 @@
+{% extends 'layout.html' %}
+{% load common %}
+{% load permission %}
+
+{% block content %}
+    {% if  url_add_name %}
+        <!-- 权限判断 -->
+        {% if request|has_permission:url_add_name %}
+            <div style="margin-bottom: 5px;">
+                <a class="btn btn-primary" href="{% url_plus request url_add_name %}">添加</a>
+            </div>
+        {% endif %}
+    {% endif %}
+
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>序号</th>
+            {% for item in table_header %}
+                <th>{{ item }}</th>
+            {% endfor %}
+            <th>选项</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for row in pager.queryset %}
+            <tr>
+                <td>{% loop_counter request forloop.counter %}</td>
+
+                {% for name in table_field %}
+                    <td>{% getattr_plus row name %}</td>
+                {% endfor %}
+
+
+                <td>
+                    {% if request|has_permission:url_edit_name %}
+                        <a class="btn btn-success btn-xs" href="{% url_plus request url_edit_name nid=row.id %}">编辑</a>
+                    {% endif %}
+                    {% if request|has_permission:url_delete_name %}
+                        <a class="btn btn-danger btn-xs" href="{% url_plus request url_delete_name nid=row.id %}">删除</a>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+
+    {{ pager.html }}
+
+{% endblock %}

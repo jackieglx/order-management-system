@@ -1,0 +1,44 @@
+{% extends 'layout.html' %}
+{% load common %}
+{% load permission %}
+
+{% block content %}
+    <!-- 权限判断 -->
+    {% if request|has_permission:"level_add" %}
+        <div style="margin-bottom: 5px;">
+            <a class="btn btn-primary" href="{% url_plus request  'level_add' %}">添加</a>
+        </div>
+    {% endif %}
+
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>序号</th>
+            <th>标题</th>
+            <th>折扣</th>
+            <th>选项</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for row in pager.queryset %}
+            <tr>
+                <td>{% loop_counter request forloop.counter %}</td>
+                <td>{{ row.title }}</td>
+                <td>{{ row.percent }}%</td>
+                <td>
+                    {% if request|has_permission:"level_edit" %}
+                        <a class="btn btn-success btn-xs" href="{% url_plus request 'level_edit' nid=row.id %}">编辑</a>
+                    {% endif %}
+                    {% if request|has_permission:"level_delete" %}
+                        <a class="btn btn-danger btn-xs" href="{% url_plus request 'level_delete' nid=row.id %}">删除</a>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+
+    {{ pager.html }}
+
+{% endblock %}
